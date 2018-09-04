@@ -84,4 +84,8 @@
     <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
     <engine name="android" spec="~7.0.0" />
     <engine name="ios" spec="~4.5.5" />
+    <plugin name="cordova-plugin-googleplus" spec="^5.3.1">
+        <variable name="REVERSED_CLIENT_ID" value="com.googleusercontent.apps.302690628886-di3k8s785acpu16ebdljvskar5508an8" />
+        <variable name="WEB_APPLICATION_CLIENT_ID" value="302690628886-t6ir7c1i349kce9qp2umiqhi1d9vdcck.apps.googleusercontent.com" />
+    </plugin>
 </widget>
