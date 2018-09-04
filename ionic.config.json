@@ -1,5 +1,7 @@
 {
   "name": "saa-milk",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }
