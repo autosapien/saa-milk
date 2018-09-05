@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import { AuthGuardService} from '../services/auth-guard.service';
 import { TabsPage } from './tabs.page';
 import { DeptPage } from '../dept/dept.page';
 import { AboutPage } from '../about/about.page';
@@ -24,7 +25,8 @@ const routes: Routes = [
       {
         path: 'about',
         outlet: 'about',
-        component: AboutPage
+        component: AboutPage,
+        canActivate: [AuthGuardService]
       }
     ]
   },
