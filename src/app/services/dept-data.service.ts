@@ -28,7 +28,8 @@ export class DeptDataService {
   // remote data access script related
   private dataScriptId = '12tSxmhB3uwe8d8e8auq5luAcqOLSn0yRpcsqkAIm5pZWdHF_puO-hPlQ';
 
-  constructor(public http: HttpClient) {
+  constructor(
+    public http: HttpClient) {
   }
 
   /**

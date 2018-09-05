@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { NavController, Platform, LoadingController } from '@ionic/angular';
 import { GooglePlus } from '@ionic-native/google-plus/ngx';
 
+import { DeptDataService } from '../services/dept-data.service';
+
 @Component({
   selector: 'app-home',
   templateUrl: 'dept.page.html',
@@ -24,15 +26,45 @@ export class DeptPage {
     idToken: ''
   };
 
-  selectedDairy = '';
-  dairyList: Array<{ id: string, name: string }>;
+  selectedDept = '';
+  deptList: Array<{ id: string, name: string }>;
 
   constructor(
     public nav: NavController,
     public platform: Platform,
     public loadingCtrl: LoadingController,
-    public googlePlus: GooglePlus
+    public googlePlus: GooglePlus,
+    public deptService: DeptDataService
   ) {
+    this.initialize();
+  }
+
+  /**
+    * Initialize the app
+    *   - After the platform is ready
+    *   - Try a silent login
+    *   - Prepare the dairy DataProvider with the user user
+    *   - Load dairies that this user has access to
+    */
+  async initialize() {
+    try {
+      await this.platform.ready();
+      await this.silentLogin();
+      await this.deptService.initialize(this.user.email, this.user.accessToken);
+      await this.loadDeptments();
+    } catch (eroor) {
+    }
+  }
+
+  async silentLogin() {
+    try {
+      const res = await this.googlePlus.trySilentLogin(this.googlePlusLoginObj);
+      this.loadUserFromResult(res);
+      this.user.isLoggedIn = true;
+    } catch (error) {
+      // silent login failed. do nothing. The user will login manaully
+      console.log('login error: ', error);
+    }
   }
 
   async login() {
@@ -40,15 +72,14 @@ export class DeptPage {
       const res = await this.googlePlus.login(this.googlePlusLoginObj);
       this.loadUserFromResult(res);
       this.user.isLoggedIn = true;
-      // await this.dairyDP.initialize(this.user.email, this.user.accessToken);
-      // await this.loadDairies();
+      await this.deptService.initialize(this.user.email, this.user.accessToken);
+      await this.loadDeptments();
     } catch (error) {
-      // do nothing as the login failed
+      // do nothing if the login failed, the UI will remain at Login button
     }
   }
 
   loadUserFromResult(res) {
-    console.log(res);
     this.user.displayName = res.displayName;
     this.user.email = res.email;
     this.user.imageUrl = res.imageUrl;
@@ -57,7 +88,7 @@ export class DeptPage {
   }
 
   async logout() {
-    // await this.googlePlus.logout();
+    await this.googlePlus.logout();
     this.user.displayName = '';
     this.user.email = '';
     this.user.imageUrl = '';
@@ -66,12 +97,35 @@ export class DeptPage {
     this.user.isLoggedIn = false;
 
     // create selected dairy info also
-    // this.selectedDairy = '';
-    // this.dairyList = [];
+    this.selectedDept = '';
+    this.deptList = [];
 
-    // clear the dataprovider for the dairies
-    // this.dairyDP.clear()
-}
+    // clear the depratment service state
+    this.deptService.clear();
+  }
+
+  async loadDeptments() {
+    // show a loading... message
+    const loading = await this.loadingCtrl.create({
+      message: 'Loading Departments...'
+    });
+    await loading.present();
+
+    // load departments via the service
+    try {
+      this.deptList = await this.deptService.getDepts();
+      console.log('loaded depts: ', this.deptList);
+    } catch (error) {
+    } finally {
+      loading.dismiss();
+    }
+  }
+
+  onDeptSelected() {
+    this.deptService.selectedDeptCode = this.selectedDept;
+    this.deptService.selectedDeptName = this.deptService.depts[this.selectedDept];
+    // this.nav.parent.select(1);   // goto the Milk Tab
+  }
 
 
 }

@@ -1,6 +1,6 @@
 <ion-content padding>
-  
-  <!--<div text-center *ngIf="user.isLoggedIn">
+
+  <div text-center *ngIf="user.isLoggedIn">
     <ion-row style="height: 25px"></ion-row>
     <img class="avatar" src="{{user.imageUrl}}">
     <ion-row style="height: 10px"></ion-row>
@@ -9,12 +9,12 @@
     </div>
     <ion-row style="height: 20px"></ion-row>
     <ion-item>
-      <ion-label color="dark">Select Dairy</ion-label>
-      <ion-select [(ngModel)]="selectedDairy" (ionChange)="onDairySelected()">
-        <ion-option *ngFor="let d of dairyList" value="{{d.id}}">{{d.name}}</ion-option>
+      <ion-label color="dark">Select Your Department</ion-label>
+      <ion-select [(ngModel)]="selectedDept" (ionChange)="onDeptSelected()">
+        <ion-select-option *ngFor="let d of deptList" value="{{d.id}}">{{d.name}}</ion-select-option>
       </ion-select>
     </ion-item>
-    <ion-row style="height: 200px"></ion-row>-->
+  </div>
 
   <div text-center *ngIf="!user.isLoggedIn">
     <ion-row style="height: 50px"></ion-row>
@@ -29,6 +29,6 @@
 </ion-content>
 
 <ion-footer no-border text-center *ngIf="user.isLoggedIn">
-    <ion-button color="danger" (click)="logout()">Logout</ion-button>
-    <ion-row style="height: 30px"></ion-row>
+  <ion-button color="danger" (click)="logout()">Logout</ion-button>
+  <ion-row style="height: 30px"></ion-row>
 </ion-footer>
