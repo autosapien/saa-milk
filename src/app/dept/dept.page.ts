@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, Platform, LoadingController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { GooglePlus } from '@ionic-native/google-plus/ngx';
 
 import { DeptDataService } from '../services/dept-data.service';
@@ -32,6 +33,7 @@ export class DeptPage {
   constructor(
     public nav: NavController,
     public platform: Platform,
+    public router: Router,
     public loadingCtrl: LoadingController,
     public googlePlus: GooglePlus,
     public deptService: DeptDataService
@@ -122,9 +124,12 @@ export class DeptPage {
   }
 
   onDeptSelected() {
-    this.deptService.selectedDeptCode = this.selectedDept;
-    this.deptService.selectedDeptName = this.deptService.depts[this.selectedDept];
-    // this.nav.parent.select(1);   // goto the Milk Tab
+    // when a valid dept is selected in the UI, goto the milk page for that dept
+    if ((this.selectedDept !== '') && (this.selectedDept !== undefined)) {  // on app start we get undefined so guard against that
+      this.deptService.selectedDeptCode = this.selectedDept;
+      this.deptService.selectedDeptName = this.deptService.depts[this.selectedDept];
+      this.router.navigateByUrl('tabs/(about:about)');  // goto the Milk Tab
+    }
   }
 
 
