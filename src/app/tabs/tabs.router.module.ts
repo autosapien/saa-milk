@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuardService} from '../services/auth-guard.service';
 import { TabsPage } from './tabs.page';
 import { DeptPage } from '../dept/dept.page';
-import { AboutPage } from '../about/about.page';
+import { MilkPage } from '../milk/milk.page';
 
 
 const routes: Routes = [
@@ -23,9 +23,9 @@ const routes: Routes = [
         component: DeptPage
       },
       {
-        path: 'about',
-        outlet: 'about',
-        component: AboutPage,
+        path: 'milk',
+        outlet: 'milk',
+        component: MilkPage,
         canActivate: [AuthGuardService]
       }
     ]

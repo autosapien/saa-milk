@@ -130,7 +130,7 @@ export class DeptPage {
     if ((this.selectedDept !== '') && (this.selectedDept !== undefined)) {  // on app start we get undefined so guard against that
       this.deptService.selectedDeptCode = this.selectedDept;
       this.deptService.selectedDeptName = this.deptService.depts[this.selectedDept];
-      this.router.navigateByUrl('tabs/(about:about)');  // goto the Milk Tab
+      this.router.navigateByUrl('tabs/(milk:milk)');  // goto the Milk Tab
     }
   }
 

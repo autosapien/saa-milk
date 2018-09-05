@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { TabsPageRoutingModule } from './tabs.router.module';
 
 import { TabsPage } from './tabs.page';
-import { AboutPageModule } from '../about/about.module';
+import { MilkPageModule } from '../milk/milk.module';
 import { DeptPageModule } from '../dept/dept.module';
 
 @NgModule({
@@ -17,7 +17,7 @@ import { DeptPageModule } from '../dept/dept.module';
     FormsModule,
     TabsPageRoutingModule,
     DeptPageModule,
-    AboutPageModule,
+    MilkPageModule,
   ],
   declarations: [TabsPage]
 })
