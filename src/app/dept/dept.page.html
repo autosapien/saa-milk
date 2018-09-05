@@ -20,7 +20,7 @@
     <ion-row style="height: 50px"></ion-row>
     <h1>Welcome to Sri Aurobindo Ashram Milk Recorder</h1>
     <ion-row style="height: 15px"></ion-row>
-    <ion-button middle color="danger" (tap)="login()">
+    <ion-button middle color="danger" (click)="login()">
       <ion-icon name="logo-googleplus"></ion-icon>
       &nbsp; Login with Google
     </ion-button>
@@ -29,6 +29,6 @@
 </ion-content>
 
 <ion-footer no-border text-center *ngIf="user.isLoggedIn">
-    <ion-button color="danger" (tap)="logout()">Logout</ion-button>
+    <ion-button color="danger" (click)="logout()">Logout</ion-button>
     <ion-row style="height: 30px"></ion-row>
 </ion-footer>
