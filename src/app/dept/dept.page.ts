@@ -28,7 +28,7 @@ export class DeptPage {
   };
 
   selectedDept = '';
-  deptList: Array<{ id: string, name: string }>;
+  deptList: Array<{ id: string, name: string, selected: boolean }>;
 
   constructor(
     public nav: NavController,
@@ -113,10 +113,12 @@ export class DeptPage {
     });
     await loading.present();
 
-    // load departments via the service
+    // load departments via the service. If a dept was alredy selected (during last use) set that too
     try {
       this.deptList = await this.deptService.getDepts();
-      console.log('loaded depts: ', this.deptList);
+      for (const dept of this.deptList) {
+        if (dept.selected) { this.selectedDept = dept.id; }
+      }
     } catch (error) {
     } finally {
       loading.dismiss();

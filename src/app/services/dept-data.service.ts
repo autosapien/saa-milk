@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Storage } from '@ionic/storage';
+
 
 enum DeptServiceOp {
   getACL
 }
+
+const KEY_STORAGE_LASTUSEDDEPT = 'lastUsedDeptCode';
+
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +21,12 @@ export class DeptDataService {
 
   // dairy related state
   public depts = new Map<string, string>();   // diary code to dairy name mapping
-  public selectedDeptCode = '';
+  private _selectedDeptCode = '';
+  get selectedDeptCode() { return this._selectedDeptCode; }
+  set selectedDeptCode(value: string) { console.log('here');
+    this._selectedDeptCode = value;
+    this.storage.set(KEY_STORAGE_LASTUSEDDEPT, value);
+  }
   public selectedDeptName = '';
 
   // access control for depts
@@ -29,7 +39,8 @@ export class DeptDataService {
   private dataScriptId = '12tSxmhB3uwe8d8e8auq5luAcqOLSn0yRpcsqkAIm5pZWdHF_puO-hPlQ';
 
   constructor(
-    public http: HttpClient) {
+    public http: HttpClient,
+    public storage: Storage) {
   }
 
   /**
@@ -95,7 +106,7 @@ export class DeptDataService {
   /**
    * Return an array of objects with depts accessible by the current user
    */
-  public async getDepts(): Promise<Array<{ id: string, name: string }>> {
+  public async getDepts(): Promise<Array<{ id: string, name: string, selected: boolean }>> {
 
     // build the acl for all users
     if (isEmpty(this.aclByEmail)) {
@@ -105,10 +116,14 @@ export class DeptDataService {
     // get acl fof this user
     const aclOfThisUser = this.aclByEmail[this.email];
 
-    // build and return an array of depts accessible by the user
+    // get the department the user last used while using this app
+    const lastUsedDeptCode = await this.storage.get(KEY_STORAGE_LASTUSEDDEPT);
+    console.log(lastUsedDeptCode);
+
+    // build the array of depts accessible to this user
     const res = [];
-    for (const deptId of aclOfThisUser) {
-      res.push({ id: deptId, name: this.depts[deptId] });
+    for (const deptCode of aclOfThisUser) {
+      res.push({ id: deptCode, name: this.depts[deptCode], selected: lastUsedDeptCode === deptCode });
     }
     return res;
   }
