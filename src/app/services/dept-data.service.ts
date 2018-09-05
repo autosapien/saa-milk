@@ -11,7 +11,7 @@ enum DeptServiceOp {
 export class DeptDataService {
 
   // user related state
-  private email = '';
+  public email = '';
   private accessToken = '';
 
   // dairy related state
