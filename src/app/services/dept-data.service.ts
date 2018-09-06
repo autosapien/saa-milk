@@ -23,7 +23,7 @@ export class DeptDataService {
   public depts = new Map<string, string>();   // diary code to dairy name mapping
   private _selectedDeptCode = '';
   get selectedDeptCode() { return this._selectedDeptCode; }
-  set selectedDeptCode(value: string) { console.log('here');
+  set selectedDeptCode(value: string) {
     this._selectedDeptCode = value;
     this.storage.set(KEY_STORAGE_LASTUSEDDEPT, value);
   }
@@ -73,6 +73,7 @@ export class DeptDataService {
    */
   private async loadAccessControlData(): Promise<any> {
     const uri = this.makeUriForOperation(DeptServiceOp.getACL);
+    console.log(uri);
     return new Promise<string>((resolve, reject) => {
       this.http.get(uri).subscribe(data => {
         resolve(data['values']);
@@ -86,21 +87,21 @@ export class DeptDataService {
    * Build the aclByEmail and aclByDept of this user
    */
   private async buildAcl() {
-    const res = await this.loadAccessControlData();
+      const res = await this.loadAccessControlData();
 
-    // setup the aclByDempt and aclByEmail
-    for (const row of res) {
-      this.depts[row[0]] = row[1];
-      const emails = row[2].split('\n');
-      this.aclByDept[row[0]] = emails;
-      for (const email of emails) {
-        if (this.aclByEmail[email] === undefined) {
-          this.aclByEmail[email] = [row[0]];
-        } else {
-          this.aclByEmail[email].push(row[0]);
+      // setup the aclByDempt and aclByEmail
+      for (const row of res) {
+        this.depts[row[0]] = row[1];
+        const emails = row[2].split('\n');
+        this.aclByDept[row[0]] = emails;
+        for (const email of emails) {
+          if (this.aclByEmail[email] === undefined) {
+            this.aclByEmail[email] = [row[0]];
+          } else {
+            this.aclByEmail[email].push(row[0]);
+          }
         }
       }
-    }
   }
 
   /**
@@ -145,7 +146,7 @@ export class DeptDataService {
 }
 
 // utils
-function isEmpty( obj ): boolean {
+function isEmpty(obj): boolean {
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
       return false;

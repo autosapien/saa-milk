@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { NavController, Platform, LoadingController } from '@ionic/angular';
+import { NavController, Platform, LoadingController, AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { GooglePlus } from '@ionic-native/google-plus/ngx';
+import { GooglePlusMock } from '../mock/mock';
 
 import { DeptDataService } from '../services/dept-data.service';
 
@@ -35,6 +36,7 @@ export class DeptPage {
     public platform: Platform,
     public router: Router,
     public loadingCtrl: LoadingController,
+    public alertController: AlertController,
     public googlePlus: GooglePlus,
     public deptService: DeptDataService
   ) {
@@ -46,39 +48,33 @@ export class DeptPage {
     *   - After the platform is ready
     *   - Try a silent login
     *   - Prepare the dairy DataProvider with the user user
-    *   - Load dairies that this user has access to
+    *   - Load depts that this user has access to
     */
   async initialize() {
+    await this.platform.ready();
     try {
-      await this.platform.ready();
-      await this.silentLogin();
-      await this.deptService.initialize(this.user.email, this.user.accessToken);
-      await this.loadDeptments();
-    } catch (eroor) {
+      await this.googleLogin(true);    // attempt silent login
+      this.deptService.initialize(this.user.email, this.user.accessToken);
+    } catch (e) {
+      // silent login failed. Do nothing, allow user to login manually via UI
+      return;
     }
+    await this.loadDeptments();
   }
 
-  async silentLogin() {
-    try {
-      const res = await this.googlePlus.trySilentLogin(this.googlePlusLoginObj);
-      this.loadUserFromResult(res);
-      this.user.isLoggedIn = true;
-    } catch (error) {
-      // silent login failed. do nothing. The user will login manaully
-      console.log('login error: ', error);
+  /**
+   * Attempt google login
+   * @param silent If the login is silent (on app start)
+   */
+  async googleLogin(silent = false) {
+    let res = '';
+    if (silent) {
+      res = await this.googlePlus.trySilentLogin(this.googlePlusLoginObj);
+    } else {
+      res = await this.googlePlus.login(this.googlePlusLoginObj);
     }
-  }
-
-  async login() {
-    try {
-      const res = await this.googlePlus.login(this.googlePlusLoginObj);
-      this.loadUserFromResult(res);
-      this.user.isLoggedIn = true;
-      await this.deptService.initialize(this.user.email, this.user.accessToken);
-      await this.loadDeptments();
-    } catch (error) {
-      // do nothing if the login failed, the UI will remain at Login button
-    }
+    this.loadUserFromResult(res);
+    this.user.isLoggedIn = true;
   }
 
   loadUserFromResult(res) {
@@ -89,7 +85,22 @@ export class DeptPage {
     this.user.idToken = res.idToken;
   }
 
-  async logout() {
+  async onLoginTapped() {
+    try {
+      await this.googleLogin();
+      this.deptService.initialize(this.user.email, this.user.accessToken);
+    } catch (e) {
+      if (e === 13) { // the user cancelled the login. Found by trial and error
+        return;
+      }
+      const alert = await this.alertController.create({ header: 'Error', message: e.error, buttons: ['OK'] });
+      await alert.present();
+      return;
+    }
+    await this.loadDeptments();
+  }
+
+  async onLogoutTapped() {
     await this.googlePlus.logout();
     this.user.displayName = '';
     this.user.email = '';
@@ -106,10 +117,13 @@ export class DeptPage {
     this.deptService.clear();
   }
 
+  /**
+   * Attempt to load departments for a user. On failure will dispaly an alert message
+   */
   async loadDeptments() {
     // show a loading... message
     const loading = await this.loadingCtrl.create({
-      message: 'Loading Departments...'
+      message: 'Loading Your Departments...'
     });
     await loading.present();
 
@@ -120,6 +134,11 @@ export class DeptPage {
         if (dept.selected) { this.selectedDept = dept.id; }
       }
     } catch (error) {
+      const errMsg = ((error.status === 401) || (error.status === 403)) ?
+        'You do no have permission for this operation' :
+        'Error loading departments';
+      const alert = await this.alertController.create({ header: 'Error', message: errMsg, buttons: ['OK'] });
+      await alert.present();
     } finally {
       loading.dismiss();
     }
