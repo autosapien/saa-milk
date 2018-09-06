@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="danger">
-    <ion-title>{{deptService.selectedDeptName}} - {{monthList[selMonth].month}}, {{selYear}}</ion-title>
+    <ion-title text-center>{{deptService.selectedDeptName}} - {{monthList[selMonth].month}} {{selYear}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -14,7 +14,7 @@
   <ion-item>
     <ion-label>Year</ion-label>
     <ion-select [(ngModel)]="selYear" (ionChange)="yearChanged()">
-      <ion-select-option *ngFor="let y of yearList" value="{{y.id}}">{{y.year}}</ion-select-option>
+      <ion-select-option *ngFor="let y of yearList" value="{{y}}">{{y}}</ion-select-option>
     </ion-select>
   </ion-item>
 
