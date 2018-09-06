@@ -10,7 +10,7 @@
     <ion-row style="height: 20px"></ion-row>
     <ion-item>
       <ion-label color="dark">Select Your Department</ion-label>
-      <ion-select [(ngModel)]="selectedDept" (ionChange)="onDeptSelected()">
+      <ion-select [(ngModel)]="selectedDeptCode" (ionChange)="onDeptSelected($event)">
         <ion-select-option *ngFor="let d of deptList" value="{{d.id}}">{{d.name}}</ion-select-option>
       </ion-select>
     </ion-item>

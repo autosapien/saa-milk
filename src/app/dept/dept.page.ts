@@ -1,15 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { NavController, Platform, LoadingController, AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { GooglePlus } from '@ionic-native/google-plus/ngx';
 import { GooglePlusMock } from '../mock/mock';
+import { Select } from '@ionic/angular';
+
 
 import { DeptDataService } from '../services/dept-data.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'dept.page.html',
-  styleUrls: ['dept.page.scss']
+  styleUrls: ['dept.page.scss'],
 })
 export class DeptPage {
 
@@ -28,7 +30,7 @@ export class DeptPage {
     idToken: ''
   };
 
-  selectedDept = '';
+  selectedDeptCode = '';
   deptList: Array<{ id: string, name: string, selected: boolean }>;
 
   constructor(
@@ -38,7 +40,8 @@ export class DeptPage {
     public loadingCtrl: LoadingController,
     public alertController: AlertController,
     public googlePlus: GooglePlus,
-    public deptService: DeptDataService
+    public deptService: DeptDataService,
+    private _cdr: ChangeDetectorRef
   ) {
     this.initialize();
   }
@@ -110,7 +113,7 @@ export class DeptPage {
     this.user.isLoggedIn = false;
 
     // create selected dairy info also
-    this.selectedDept = '';
+    this.selectedDeptCode = '';
     this.deptList = [];
 
     // clear the depratment service state
@@ -127,11 +130,14 @@ export class DeptPage {
     });
     await loading.present();
 
-    // load departments via the service. If a dept was alredy selected (during last use) set that too
+    // load departments via the service. If a dept was alredy selected (during last use) set the select control's value to that
     try {
       this.deptList = await this.deptService.getDepts();
       for (const dept of this.deptList) {
-        if (dept.selected) { this.selectedDept = dept.id; }
+        if (dept.selected) {
+          // wait a bit fro the deptList to propagate then change then state of the selected department
+          setTimeout( () => this.selectedDeptCode = dept.id, 320);
+        }
       }
     } catch (error) {
       const errMsg = ((error.status === 401) || (error.status === 403)) ?
@@ -144,14 +150,14 @@ export class DeptPage {
     }
   }
 
-  onDeptSelected() {
+  onDeptSelected($event) {
+    console.log('changed to:', $event.target.value);
     // when a valid dept is selected in the UI, goto the milk page for that dept
-    if ((this.selectedDept !== '') && (this.selectedDept !== undefined)) {  // on app start we get undefined so guard against that
-      this.deptService.selectedDeptCode = this.selectedDept;
-      this.deptService.selectedDeptName = this.deptService.depts[this.selectedDept];
-      this.router.navigateByUrl('tabs/(milk:milk)');  // goto the Milk Tab
+    if ((this.selectedDeptCode !== '') && (this.selectedDeptCode !== undefined)) {  // on app start we get undefined so guard against that
+      this.deptService.selectedDeptCode = this.selectedDeptCode;
+      this.deptService.selectedDeptName = this.deptService.depts[this.selectedDeptCode];
+      this.router.navigateByUrl('tabs/(milk:milk)');  // goto the Milk Tab */
     }
   }
-
 
 }
