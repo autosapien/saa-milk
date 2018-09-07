@@ -5,6 +5,7 @@
 </ion-header>
 
 <ion-content>
+
   <ion-item>
     <ion-label>Month</ion-label>
     <ion-select [(ngModel)]="selMonth">
@@ -18,8 +19,37 @@
     </ion-select>
   </ion-item>
 
+  <ion-card>
+    <ion-card-header>
+      <ion-card-subtitle>Week 1</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list no-border>
+        <button ion-item>
+          <ion-icon name="cart" item-start></ion-icon>
+          Shopping
+          <ion-icon name='create' item-end color="danger"></ion-icon>
+        </button>
+        <button ion-item>
+          <ion-icon name="medical" item-start></ion-icon>
+          Hospital
+          <ion-icon name='create' item-end color="danger"></ion-icon>
+        </button>
+        <button ion-item>
+          <ion-icon name="cafe" item-start></ion-icon>
+          Cafe
+          <ion-icon name='create' item-end color="danger"></ion-icon>
+        </button>
+        <button ion-item>
+          <ion-icon name="paw" item-start></ion-icon>
+          Dog Park
+        </button>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button color="danger">
+    <ion-fab-button color="danger" (click)="onDidTapMilkEnter()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

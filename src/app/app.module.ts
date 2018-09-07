@@ -11,13 +11,14 @@ import { GooglePlus } from '@ionic-native/google-plus/ngx';
 import { GooglePlusMock } from './mock/mock';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { MilkEntryPage } from './milk-entry/milk-entry.page';
 
 import { AuthGuardService } from './services/auth-guard.service';
 import { DeptDataService } from './services/dept-data.service';
 
 @NgModule({
-  declarations: [AppComponent],
-  entryComponents: [],
+  declarations: [AppComponent, MilkEntryPage],
+  entryComponents: [MilkEntryPage],
   imports: [
     BrowserModule,
     HttpClientModule,
