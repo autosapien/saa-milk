@@ -8,6 +8,8 @@ import { TabsPageRoutingModule } from './tabs.router.module';
 
 import { TabsPage } from './tabs.page';
 import { MilkPageModule } from '../milk/milk.module';
+import { MilkServedPageModule } from '../milk-served/milk-served.module';
+import { VisitorsPageModule } from '../visitors/visitors.module';
 import { DeptPageModule } from '../dept/dept.module';
 
 @NgModule({
@@ -18,6 +20,8 @@ import { DeptPageModule } from '../dept/dept.module';
     TabsPageRoutingModule,
     DeptPageModule,
     MilkPageModule,
+    MilkServedPageModule,
+    VisitorsPageModule
   ],
   declarations: [TabsPage]
 })

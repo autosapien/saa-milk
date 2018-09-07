@@ -1,0 +1,28 @@
+<ion-header>
+    <ion-toolbar color="danger">
+      <ion-title text-center>DR Milk Served</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content>
+  
+    <ion-item>
+      <ion-label>Month</ion-label>
+      <ion-select [(ngModel)]="selMonth">
+        <ion-select-option *ngFor="let m of monthList" value="{{m.id}}">{{m.month}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label>Year</ion-label>
+      <ion-select [(ngModel)]="selYear" (ionChange)="yearChanged()">
+        <ion-select-option *ngFor="let y of yearList" value="{{y}}">{{y}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+  
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button color="danger">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  
+  </ion-content>

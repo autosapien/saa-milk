@@ -2,7 +2,13 @@
   <ion-tab label="Department" icon="home" href="/tabs/(dept:dept)">
     <ion-router-outlet name="dept"></ion-router-outlet>
   </ion-tab>
-  <ion-tab label="Milk" icon="cafe" href="/tabs/(milk:milk)">
+  <ion-tab show={{tabVisibleMilk}} label="Milk" icon="swap" href="/tabs/(milk:milk)">
     <ion-router-outlet name="milk"></ion-router-outlet>
+  </ion-tab>
+  <ion-tab show={{tabVisibleVisitors}} label="Visitors" icon="people" href="/tabs/(visitors:visitors)">
+    <ion-router-outlet name="visitors"></ion-router-outlet>
+  </ion-tab>
+  <ion-tab show={{tabVisibleMilkServed}} label="Milk Served" icon="cafe" href="/tabs/(milk-served:milk-served)">
+    <ion-router-outlet name="milk-served"></ion-router-outlet>
   </ion-tab>
 </ion-tabs>

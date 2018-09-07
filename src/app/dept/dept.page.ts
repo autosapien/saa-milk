@@ -2,6 +2,7 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { NavController, Platform, LoadingController, AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { GooglePlus } from '@ionic-native/google-plus/ngx';
+import { Events } from '@ionic/angular';
 import { GooglePlusMock } from '../mock/mock';
 import { Select } from '@ionic/angular';
 
@@ -13,9 +14,9 @@ import { DeptDataService } from '../services/dept-data.service';
   templateUrl: 'dept.page.html',
   styleUrls: ['dept.page.scss'],
 })
-export class DeptPage {
+export class DeptPage  {
 
-  googlePlusLoginObj: { scopes: string, webClientId: string, offline: boolean } = {
+  googlePlusLoginObj = {
     scopes: 'https://www.googleapis.com/auth/spreadsheets',
     webClientId: '302690628886-t6ir7c1i349kce9qp2umiqhi1d9vdcck.apps.googleusercontent.com',
     offline: false  // https://github.com/EddyVerbruggen/cordova-plugin-googleplus/issues/464
@@ -30,8 +31,9 @@ export class DeptPage {
     idToken: ''
   };
 
-  selectedDeptCode = '';
+  // deparments
   deptList: Array<{ id: string, name: string, selected: boolean }>;
+  selectedDeptCode = '';
 
   constructor(
     public nav: NavController,
@@ -39,6 +41,7 @@ export class DeptPage {
     public router: Router,
     public loadingCtrl: LoadingController,
     public alertController: AlertController,
+    public events: Events,
     public googlePlus: GooglePlus,
     public deptService: DeptDataService,
     private _cdr: ChangeDetectorRef
@@ -56,13 +59,13 @@ export class DeptPage {
   async initialize() {
     await this.platform.ready();
     try {
-      await this.googleLogin(true);    // attempt silent login
+      // TODO await this.googleLogin(true);    // attempt silent login
       this.deptService.initialize(this.user.email, this.user.accessToken);
     } catch (e) {
       // silent login failed. Do nothing, allow user to login manually via UI
       return;
     }
-    await this.loadDeptments();
+    // TODO await this.loadDeptments();
   }
 
   /**
@@ -118,6 +121,9 @@ export class DeptPage {
 
     // clear the depratment service state
     this.deptService.clear();
+
+    // refersh the visible tabs so that only the department tab is seen
+    this.events.publish('department:didSelect', '', []);
   }
 
   /**
@@ -136,7 +142,7 @@ export class DeptPage {
       for (const dept of this.deptList) {
         if (dept.selected) {
           // wait a bit fro the deptList to propagate then change then state of the selected department
-          setTimeout( () => this.selectedDeptCode = dept.id, 320);
+          setTimeout(() => this.selectedDeptCode = dept.id, 350);
         }
       }
     } catch (error) {
@@ -151,12 +157,16 @@ export class DeptPage {
   }
 
   onDeptSelected($event) {
-    console.log('changed to:', $event.target.value);
-    // when a valid dept is selected in the UI, goto the milk page for that dept
+
     if ((this.selectedDeptCode !== '') && (this.selectedDeptCode !== undefined)) {  // on app start we get undefined so guard against that
+
+      // display the tabs the user needs to see
+      this.events.publish('department:didSelect', this.selectedDeptCode, this.deptService.deptFunctions[this.selectedDeptCode]);
+
+      // when a valid dept is selected in the UI, goto the milk page for that dept
       this.deptService.selectedDeptCode = this.selectedDeptCode;
-      this.deptService.selectedDeptName = this.deptService.depts[this.selectedDeptCode];
-      this.router.navigateByUrl('tabs/(milk:milk)');  // goto the Milk Tab */
+      this.deptService.selectedDeptName = this.deptService.deptNames[this.selectedDeptCode];
+      // this.router.navigateByUrl('tabs/(milk:milk)');  // goto the Milk Tab */
     }
   }
 
