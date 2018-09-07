@@ -20,7 +20,8 @@ export class DeptDataService {
   private accessToken = '';
 
   // dairy related state
-  public depts = new Map<string, string>();   // diary code to dairy name mapping
+  public depts = new Map<string, string>();                     // dept code to dept name mapping
+  public deptsArray: Array<{ code: string, name: string }> = [];  // array of all depts
   private _selectedDeptCode = '';
   get selectedDeptCode() { return this._selectedDeptCode; }
   set selectedDeptCode(value: string) {
@@ -73,7 +74,6 @@ export class DeptDataService {
    */
   private async loadAccessControlData(): Promise<any> {
     const uri = this.makeUriForOperation(DeptServiceOp.getACL);
-    console.log(uri);
     return new Promise<string>((resolve, reject) => {
       this.http.get(uri).subscribe(data => {
         resolve(data['values']);
@@ -84,24 +84,29 @@ export class DeptDataService {
   }
 
   /**
-   * Build the aclByEmail and aclByDept of this user
+   * Build the aclByEmail and aclByDept of this user. Also buils the list of all departments
    */
   private async buildAcl() {
-      const res = await this.loadAccessControlData();
+    const res = await this.loadAccessControlData();
 
-      // setup the aclByDempt and aclByEmail
-      for (const row of res) {
-        this.depts[row[0]] = row[1];
-        const emails = row[2].split('\n');
-        this.aclByDept[row[0]] = emails;
-        for (const email of emails) {
-          if (this.aclByEmail[email] === undefined) {
-            this.aclByEmail[email] = [row[0]];
-          } else {
-            this.aclByEmail[email].push(row[0]);
-          }
+    // setup the aclByDempt and aclByEmail
+    this.depts.clear();
+    this.deptsArray = [];
+    for (const row of res) {
+
+      this.depts[row[0]] = row[1];
+      this.deptsArray.push({ code: row[0], name: row[1] });
+
+      const emails = row[2].split('\n');
+      this.aclByDept[row[0]] = emails;
+      for (const email of emails) {
+        if (this.aclByEmail[email] === undefined) {
+          this.aclByEmail[email] = [row[0]];
+        } else {
+          this.aclByEmail[email].push(row[0]);
         }
       }
+    }
   }
 
   /**
