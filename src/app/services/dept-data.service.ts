@@ -119,7 +119,6 @@ export class DeptDataService {
 
     // get the department the user last used while using this app
     const lastUsedDeptCode = await this.storage.get(KEY_STORAGE_LASTUSEDDEPT);
-    console.log(lastUsedDeptCode);
 
     // build the array of depts accessible to this user
     const res = [];
