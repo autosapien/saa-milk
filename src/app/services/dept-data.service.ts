@@ -7,8 +7,16 @@ enum DeptServiceOp {
   getACL
 }
 
-const KEY_STORAGE_LASTUSEDDEPT = 'lastUsedDeptCode';
+export enum DeptFunction {
+  MILK_SEND = 0,
+  MILK_RECEIVE,
+  VISITOR_SEND,
+  VISITOR_RECEIVE,
+  MILK_SERVE,
+}
 
+
+const KEY_STORAGE_LASTUSEDDEPT = 'lastUsedDeptCode';
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +27,11 @@ export class DeptDataService {
   public email = '';
   private accessToken = '';
 
-  // dairy related state
-  public depts = new Map<string, string>();                     // dept code to dept name mapping
-  public deptsArray: Array<{ code: string, name: string }> = [];  // array of all depts
+  // all departments
+  public deptNames = new Map<string, string>(); // dept code -> dept name
+  public deptFunctions = new Map<string, Array<DeptFunction>>(); // dept code -> dept functions
+  public deptsArray: Array<{ code: string, name: string, functions: Array<DeptFunction> }> = [];  // array of all depts
+
   private _selectedDeptCode = '';
   get selectedDeptCode() { return this._selectedDeptCode; }
   set selectedDeptCode(value: string) {
@@ -30,9 +40,10 @@ export class DeptDataService {
   }
   public selectedDeptName = '';
 
+
   // access control for depts
-  private controlSheetId = '1UAXDtuuH2qY4-U-ACQFmL9UC7j-hnYpyes7eM9HVtAs';
-  private controlSheetRange = 'A2:C30';  // we wont ever have more than 28 departments
+  private aclSheetId = '1UAXDtuuH2qY4-U-ACQFmL9UC7j-hnYpyes7eM9HVtAs';
+  private aclSheetRange = 'A2:D30';  // we wont ever have more than 28 departments
   private aclByDept = new Map<string, Array<string>>();
   private aclByEmail = new Map<string, Array<string>>();
 
@@ -64,7 +75,7 @@ export class DeptDataService {
     const sheetsUri = 'https://sheets.googleapis.com/v4/spreadsheets/';
     switch (op) {
       case DeptServiceOp.getACL: {
-        return sheetsUri + this.controlSheetId + '/values/' + this.controlSheetRange + '?access_token=' + this.accessToken;
+        return sheetsUri + this.aclSheetId + '/values/' + this.aclSheetRange + '?access_token=' + this.accessToken;
       }
     }
   }
@@ -89,21 +100,30 @@ export class DeptDataService {
   private async buildAcl() {
     const res = await this.loadAccessControlData();
 
-    // setup the aclByDempt and aclByEmail
-    this.depts.clear();
+    // setup deptNames, deptFunctions, deptsArray and for the user aclByDept and aclByEmail
+    this.deptNames.clear();
+    this.deptFunctions.clear();
     this.deptsArray = [];
     for (const row of res) {
-
-      this.depts[row[0]] = row[1];
-      this.deptsArray.push({ code: row[0], name: row[1] });
-
+      // from row to representative data
+      const deptCode = row[0];
+      const deptName = row[1];
       const emails = row[2].split('\n');
-      this.aclByDept[row[0]] = emails;
+      const deptFunctionsStr = row[3].split('\n');
+      const deptFunctions = deptFunctionsStr.map( (i) => DeptFunction[i] );
+
+      // add row data to deparments
+      this.deptNames[deptCode] = deptName;
+      this.deptFunctions[deptCode] = deptFunctions;
+      this.deptsArray.push({ code: deptCode, name: deptName, functions: deptFunctions });
+
+      // add row data to user acl
+      this.aclByDept[deptCode] = emails;
       for (const email of emails) {
         if (this.aclByEmail[email] === undefined) {
-          this.aclByEmail[email] = [row[0]];
+          this.aclByEmail[email] = [deptCode];    // create a new key as it does not exisit
         } else {
-          this.aclByEmail[email].push(row[0]);
+          this.aclByEmail[email].push(deptCode);
         }
       }
     }
@@ -128,7 +148,7 @@ export class DeptDataService {
     // build the array of depts accessible to this user
     const res = [];
     for (const deptCode of aclOfThisUser) {
-      res.push({ id: deptCode, name: this.depts[deptCode], selected: lastUsedDeptCode === deptCode });
+      res.push({ id: deptCode, name: this.deptNames[deptCode], selected: lastUsedDeptCode === deptCode });
     }
     return res;
   }
@@ -140,11 +160,13 @@ export class DeptDataService {
   public clear() {
     this.email = '';
     this.accessToken = '';
-    this.depts = new Map<string, string>();
+    this.deptNames.clear();
+    this.deptFunctions.clear();
+    this.deptsArray = [];
     this.selectedDeptCode = '';
     this.selectedDeptName = '';
-    this.aclByDept = new Map<string, Array<string>>();
-    this.aclByEmail = new Map<string, Array<string>>();
+    this.aclByDept.clear();
+    this.aclByEmail.clear();
   }
 
 }
