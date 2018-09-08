@@ -12,13 +12,14 @@ import { GooglePlusMock } from './mock/mock';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MilkEntryPage } from './milk-entry/milk-entry.page';
+import { VisitorEntryPage } from './visitor-entry/visitor-entry.page';
 
 import { AuthGuardService } from './services/auth-guard.service';
 import { DeptDataService } from './services/dept-data.service';
 
 @NgModule({
-  declarations: [AppComponent, MilkEntryPage],
-  entryComponents: [MilkEntryPage],
+  declarations: [AppComponent, MilkEntryPage, VisitorEntryPage],
+  entryComponents: [MilkEntryPage, VisitorEntryPage],
   imports: [
     BrowserModule,
     HttpClientModule,
