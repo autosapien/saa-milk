@@ -13,6 +13,8 @@ export enum DeptFunction {
   VISITOR_SEND,
   VISITOR_RECEIVE,
   MILK_SERVE,
+  CHEESE_SEND,
+  CHEESE_RECEIVE
 }
 
 
@@ -30,7 +32,13 @@ export class DeptDataService {
   // all departments
   public deptNames = new Map<string, string>(); // dept code -> dept name
   public deptFunctions = new Map<string, Array<DeptFunction>>(); // dept code -> dept functions
-  public deptsArray: Array<{ code: string, name: string, functions: Array<DeptFunction> }> = [];  // array of all depts
+  public deptDataUris = new Map<string, string>(); // dept code -> dept data sheet uri
+  public deptsArray: Array<{
+    code: string,
+    name: string,
+    dataUri: string,
+    functions: Array<DeptFunction>
+  }> = [];  // array of all depts
 
   private _selectedDeptCode = '';
   get selectedDeptCode() { return this._selectedDeptCode; }
@@ -40,10 +48,9 @@ export class DeptDataService {
   }
   public selectedDeptName = '';
 
-
   // access control for depts
   private aclSheetId = '1UAXDtuuH2qY4-U-ACQFmL9UC7j-hnYpyes7eM9HVtAs';
-  private aclSheetRange = 'A2:D30';  // we wont ever have more than 28 departments
+  private aclSheetRange = 'A2:E30';  // we wont ever have more than 28 departments
   private aclByDept = new Map<string, Array<string>>();
   private aclByEmail = new Map<string, Array<string>>();
 
@@ -103,19 +110,22 @@ export class DeptDataService {
     // setup deptNames, deptFunctions, deptsArray and for the user aclByDept and aclByEmail
     this.deptNames.clear();
     this.deptFunctions.clear();
+    this.deptDataUris.clear();
     this.deptsArray = [];
     for (const row of res) {
       // from row to representative data
       const deptCode = row[0];
       const deptName = row[1];
-      const emails = row[2].split('\n');
+      const deptDataUri = row[2];
+      const emails = row[4].split('\n');
       const deptFunctionsStr = row[3].split('\n');
-      const deptFunctions = deptFunctionsStr.map( (i) => DeptFunction[i] );
+      const deptFunctions = deptFunctionsStr.map((i) => DeptFunction[i]);
 
       // add row data to deparments
       this.deptNames[deptCode] = deptName;
       this.deptFunctions[deptCode] = deptFunctions;
-      this.deptsArray.push({ code: deptCode, name: deptName, functions: deptFunctions });
+      this.deptDataUris[deptCode] = deptDataUri;
+      this.deptsArray.push({ code: deptCode, name: deptName, dataUri: deptDataUri, functions: deptFunctions });
 
       // add row data to user acl
       this.aclByDept[deptCode] = emails;
@@ -127,6 +137,8 @@ export class DeptDataService {
         }
       }
     }
+
+    console.log(this.deptsArray);
   }
 
   /**
@@ -152,7 +164,6 @@ export class DeptDataService {
     }
     return res;
   }
-
 
   /**
    * Clears the state of the Singleton Service Provider
