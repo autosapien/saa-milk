@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ModalController, NavParams, LoadingController, AlertController } from '@ionic/angular';
 import { Validators, FormBuilder, FormGroup } from '@angular/forms';
 import { DeptDataService } from '../services/dept-data.service';
+import { isEmpty } from '../../utils/object';
 
 
 @Component({
@@ -42,6 +43,25 @@ export class VisitorEntryPage implements OnInit {
     // Initial values for the fields
     this.form.get('numberVisitors').setValue(100);
     this.form.get('date').setValue(this.dateDispayed.toJSON());
+  }
+
+  /**
+   * Move the date in the date field by n days
+   * @param days The number of days to move the date in the date field
+   */
+  moveDate(days) {
+    const formValue = this.form.get('date').value;
+    let d = null;
+    if (typeof formValue === 'string') {
+      d = new Date(formValue);
+      d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    } else {
+      console.log(formValue);
+      d = new Date(formValue.year.value, formValue.month.value, formValue.day.value);
+    }
+    console.log(d);
+    d.setDate(d.getDate() + days);
+    this.form.get('date').setValue(d.toJSON());
   }
 
   close(data) {
