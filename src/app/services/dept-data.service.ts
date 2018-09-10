@@ -137,8 +137,6 @@ export class DeptDataService {
         }
       }
     }
-
-    console.log(this.deptsArray);
   }
 
   /**
@@ -163,6 +161,14 @@ export class DeptDataService {
       res.push({ id: deptCode, name: this.deptNames[deptCode], selected: lastUsedDeptCode === deptCode });
     }
     return res;
+  }
+
+  public async addEntry(data): Promise<boolean> {
+    return true;
+  }
+
+  public async updateEntry(data): Promise<boolean> {
+    return false;
   }
 
   /**

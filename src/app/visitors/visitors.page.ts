@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
+import { ModalController, ToastController } from '@ionic/angular';
 import { DeptDataService } from '../services/dept-data.service';
+import { VisitorEntryPage } from '../visitor-entry/visitor-entry.page';
+
 
 @Component({
   selector: 'app-visitors',
@@ -26,7 +29,47 @@ export class VisitorsPage {
     { id: '11', month: 'December' },
   ];
 
-  constructor( public deptService: DeptDataService) {
+  constructor(
+    public deptService: DeptDataService,
+    public modalController: ModalController,
+    public toastController: ToastController
+    ) {
+  }
+
+  async onDidTapVisitorsEnter() {
+    await this.showModalVisitorsEntry();
+  }
+
+  public async showModalVisitorsEntry(data = {}) {
+
+    // show modal form to add visitor data
+    const modal = await this.modalController.create({
+      component: VisitorEntryPage,
+      componentProps: data
+    });
+    await modal.present();
+
+    // show a toast if the data was saved
+    const res = await modal.onDidDismiss();
+    if (!isEmpty(res.data)) {
+      const toast = await this.toastController.create({
+        message: 'Visitor data was added successfully',
+        duration: 1000,
+      });
+      toast.present();
+    }
   }
 
 }
+
+// utils
+function isEmpty(obj): boolean {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+

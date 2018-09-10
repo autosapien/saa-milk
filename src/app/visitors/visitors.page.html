@@ -1,6 +1,6 @@
 <ion-header>
     <ion-toolbar color="danger">
-      <ion-title text-center>Visitors to DR</ion-title>
+      <ion-title>Visitors to Dining Room</ion-title>
     </ion-toolbar>
   </ion-header>
   
@@ -20,7 +20,7 @@
     </ion-item>
   
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button color="danger">
+      <ion-fab-button color="danger" (click)="onDidTapVisitorsEnter()">
         <ion-icon name="add"></ion-icon>
       </ion-fab-button>
     </ion-fab>

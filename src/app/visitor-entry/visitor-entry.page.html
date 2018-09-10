@@ -1,9 +1,44 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="danger">
+    <ion-buttons slot="primary">
+      <ion-button color="light" (click)="close({})">Close</ion-button>
+    </ion-buttons>
     <ion-title>Add Visitors Data</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content padding>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit(form.value)">
+    <ion-item>
+      <ion-label position="floating">Date</ion-label>
+      <ion-datetime formControlName="date" type="date" display-format="DDDD D MMM, YYYY"></ion-datetime>
+    </ion-item>
+    <div class="validation-errors">
+      <ng-container *ngFor="let validation of validationMessages.date">
+        <div class="error-message" *ngIf="form.get('date').hasError(validation.type) && (form.get('date').dirty || form.get('date').touched)">
+          {{ validation.message }}
+        </div>
+      </ng-container>
+    </div>
+
+    <ion-item>
+      <ion-label position="floating">Number of Visitors</ion-label>
+      <ion-input type="number"  min="0" formControlName="numberVisitors"></ion-input>
+    </ion-item>
+    <div class="validation-errors">
+      <ng-container *ngFor="let validation of validationMessages.numberVisitors">
+        <div class="error-message" *ngIf="form.get('numberVisitors').hasError(validation.type) && (form.get('numberVisitors').dirty || form.get('numberVisitors').touched)">
+          {{ validation.message }}
+        </div>
+      </ng-container>
+    </div>
+
+    <div text-center>
+      <ion-row style="height: 50px"></ion-row>
+      <ion-button type="submit" color="danger" [disabled]="!form.valid">Save</ion-button>
+
+    </div>
+  </form>
 
 </ion-content>
