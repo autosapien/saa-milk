@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ModalController, ToastController } from '@ionic/angular';
 import { DeptDataService } from '../services/dept-data.service';
 import { VisitorEntryPage } from '../visitor-entry/visitor-entry.page';
+import { isEmpty } from '../../utils/object';
 
 
 @Component({
@@ -61,15 +62,3 @@ export class VisitorsPage {
   }
 
 }
-
-// utils
-function isEmpty(obj): boolean {
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-

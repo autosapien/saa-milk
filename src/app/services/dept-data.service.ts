@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
+import { isEmpty } from '../../utils/object';
 
 
 enum DeptServiceOp {
@@ -187,14 +188,3 @@ export class DeptDataService {
   }
 
 }
-
-// utils
-function isEmpty(obj): boolean {
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      return false;
-    }
-  }
-  return true;
-}
-
