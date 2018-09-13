@@ -57,7 +57,7 @@ export class VisitorEntryPage implements OnInit {
     let d = null;
     if (typeof formValue === 'string') {
       d = new Date(formValue);
-      d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      d.setMinutes(d.getMinutes() + d.getTimezoneOffset());  // put into UTC for the form element (see _setFormDate)
     } else {
       d = new Date(formValue.year.value, formValue.month.value - 1, formValue.day.value);
     }
@@ -76,20 +76,29 @@ export class VisitorEntryPage implements OnInit {
   }
 
   async onSubmit(data) {
+    // restructure the data element for consumption
+    console.log(data);
+    const d = new Date(data['date']);
+    console.log(d);
+    /*data['date'] = new Date(
+      data['date'].getFullYear(),
+      data['date'].getMonth() - 1,
+      data['date'].getDate()
+    );*/
+
     // show a message that the data is saving
     const loading = await this.loadingController.create({
       message: 'Saving...'
     });
     loading.present();
 
-    // attmpt to save the data
+    // attempt to save the data
     const res = await this.deptService.addEntry(data);
+    loading.dismiss();
 
     if (res) {                // if saved return to previous screen
-      loading.dismiss();
       this.close(data);
     } else {                  // if not saved dismiss show an alert message that data was not saved
-      loading.dismiss();
       const msg = 'Unable to save data. Please try again.';
       const alert = await this.alertController.create({ header: 'Data Not Saved', message: msg, buttons: ['OK'] });
       await alert.present();
