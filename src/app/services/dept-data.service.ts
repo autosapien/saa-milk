@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { RequestOptions } from '@angular/http';
 import { Storage } from '@ionic/storage';
 import { isEmpty } from '../../utils/object';
 
 
 enum DeptServiceOp {
-  getACL
+  getACL,
+  getEntries,
+  postEntry
 }
 
 export enum DeptFunction {
@@ -45,6 +48,7 @@ export class DeptDataService {
   get selectedDeptCode() { return this._selectedDeptCode; }
   set selectedDeptCode(value: string) {
     this._selectedDeptCode = value;
+    this.selectedDeptName = this.deptNames[value];
     this.storage.set(KEY_STORAGE_LASTUSEDDEPT, value);
   }
   public selectedDeptName = '';
@@ -77,22 +81,47 @@ export class DeptDataService {
   /**
    * Make the URI for operations pertaining to Google Drive
    * @param op The opertaion to be performed
-   * @param deptCode The department whose operation is being performed
    */
-  private makeUriForOperation(op: DeptServiceOp, deptCode?: string) {
-    const sheetsUri = 'https://sheets.googleapis.com/v4/spreadsheets/';
+  private _makeUriForOperation(op: DeptServiceOp) {
+    const sheetsPrefix = 'https://sheets.googleapis.com/v4/spreadsheets/';
     switch (op) {
       case DeptServiceOp.getACL: {
-        return sheetsUri + this.aclSheetId + '/values/' + this.aclSheetRange + '?access_token=' + this.accessToken;
+        return sheetsPrefix + this.aclSheetId + '/values/' + this.aclSheetRange + '?access_token=' + this.accessToken;
       }
+      case DeptServiceOp.getEntries: {
+        const sheetId = this._getGoogleSheetIdfromUri(this.deptDataUris[this.selectedDeptCode]);
+        const range = 'B1:F3650';           // max 10 entries per day
+        return sheetsPrefix + sheetId + '/values/' + range + '?access_token=' + this.accessToken;
+      }
+      case DeptServiceOp.postEntry: {
+        const sheetId = this._getGoogleSheetIdfromUri(this.deptDataUris[this.selectedDeptCode]);
+        return sheetsPrefix + sheetId + '/values/' +
+          'A1:append?insertDataOption=INSERT_ROWS&valueInputOption=RAW&access_token=' + this.accessToken;
+      }
+    }
+  }
+
+  private _getGoogleSheetIdfromUri(uri: string): string {
+    let start = uri.indexOf('/d/');
+    const end = uri.indexOf('/edit');
+    if ((start === -1) || (end === -1) || (start + 3 >= end)) {
+      throw new Error('Your spreadsheet URI ' + uri + ' is malformed. Please fix this in the SAAMMA ACL sheet.');
+    }
+    start = start + 3;  // add '/d/;
+    return uri.substr(start, end - start);
+  }
+
+  private _verifyDeptsLoaded() {
+    if ((this.selectedDeptCode === '') || (this.deptsArray.length === 0)) {
+      throw new Error('Please select a department.');
     }
   }
 
   /**
    * Load the Access control data from the ACL spreadsheet
    */
-  private async loadAccessControlData(): Promise<any> {
-    const uri = this.makeUriForOperation(DeptServiceOp.getACL);
+  private async _loadAccessControlData(): Promise<any> {
+    const uri = this._makeUriForOperation(DeptServiceOp.getACL);
     return new Promise<string>((resolve, reject) => {
       this.http.get(uri).subscribe(data => {
         resolve(data['values']);
@@ -106,7 +135,7 @@ export class DeptDataService {
    * Build the aclByEmail and aclByDept of this user. Also buils the list of all departments
    */
   private async buildAcl() {
-    const res = await this.loadAccessControlData();
+    const res = await this._loadAccessControlData();
 
     // setup deptNames, deptFunctions, deptsArray and for the user aclByDept and aclByEmail
     this.deptNames.clear();
@@ -164,12 +193,53 @@ export class DeptDataService {
     return res;
   }
 
-  public async addEntry(data): Promise<boolean> {
+  public async addEntry(data: any): Promise<boolean> {
+
+    data['date'] = data['date'].substr(0, 10); // remove time
+
+    this._verifyDeptsLoaded();
+    const uri = this._makeUriForOperation(DeptServiceOp.postEntry);
+
+    // setup headers
+    const headers = new HttpHeaders();
+    headers.append('Accept', 'application/json');
+    headers.append('Content-Type', 'application/json');
+
+    // setup data. date, from_dept, to_dept, quantity, by
+    const postData = {
+      values: [[
+        data['date'],
+        this.selectedDeptCode,
+        'dr',
+        data['numberVisitors'],
+        this.email
+      ]]
+    };
+    const postDataJson = JSON.stringify(postData);
+    console.log(postDataJson);
+
+    // make the post
+    this.http.post(uri, postDataJson, { headers }).subscribe(
+      result => { },
+      error => false
+    );
     return true;
   }
 
   public async updateEntry(data): Promise<boolean> {
     return false;
+  }
+
+  public async getEntries(): Promise<any> {
+    this._verifyDeptsLoaded();
+    const uri = this._makeUriForOperation(DeptServiceOp.getEntries);
+    return new Promise<string>((resolve, reject) => {
+      this.http.get(uri).subscribe(data => {
+        resolve(data['values']);
+      }, err => {
+        reject(err);
+      });
+    });
   }
 
   /**
