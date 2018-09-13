@@ -4,17 +4,15 @@ import { Router } from '@angular/router';
 import { GooglePlus } from '@ionic-native/google-plus/ngx';
 import { Events } from '@ionic/angular';
 import { GooglePlusMock } from '../mock/mock';
-import { Select } from '@ionic/angular';
 
-
-import { DeptDataService } from '../services/dept-data.service';
+import { DeptDataService, DeptFunction } from '../services/dept-data.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'dept.page.html',
   styleUrls: ['dept.page.scss'],
 })
-export class DeptPage  {
+export class DeptPage {
 
   googlePlusLoginObj = {
     scopes: 'https://www.googleapis.com/auth/spreadsheets',
@@ -59,13 +57,14 @@ export class DeptPage  {
   async initialize() {
     await this.platform.ready();
     try {
-      // TODO await this.googleLogin(true);    // attempt silent login
+      await this.googleLogin(true);    // attempt silent login
       this.deptService.initialize(this.user.email, this.user.accessToken);
     } catch (e) {
       // silent login failed. Do nothing, allow user to login manually via UI
       return;
     }
-    // TODO await this.loadDeptments();
+    await this.loadDeptments();
+    this.events.publish('department:didSelect', this.selectedDeptCode, [DeptFunction.VISITOR_SEND]);
   }
 
   /**
@@ -146,6 +145,7 @@ export class DeptPage  {
         }
       }
     } catch (error) {
+      // in case of error, show it
       const errMsg = ((error.status === 401) || (error.status === 403)) ?
         'You do no have permission for this operation' :
         'Error loading departments';
@@ -159,14 +159,13 @@ export class DeptPage  {
   onDeptSelected($event) {
 
     if ((this.selectedDeptCode !== '') && (this.selectedDeptCode !== undefined)) {  // on app start we get undefined so guard against that
+      console.log('dept selected ', this.selectedDeptCode);
 
-      // display the tabs the user needs to see
-      this.events.publish('department:didSelect', this.selectedDeptCode, this.deptService.deptFunctions[this.selectedDeptCode]);
-
-      // when a valid dept is selected in the UI, goto the milk page for that dept
+      // update the dept service with a valid dept code
       this.deptService.selectedDeptCode = this.selectedDeptCode;
-      this.deptService.selectedDeptName = this.deptService.deptNames[this.selectedDeptCode];
-      // this.router.navigateByUrl('tabs/(milk:milk)');  // goto the Milk Tab */
+
+      // display the tabs the user needs to see. Also navigate to the tab if there is only one usalbe action tab
+      this.events.publish('department:didSelect', this.selectedDeptCode, this.deptService.deptFunctions[this.selectedDeptCode]);
     }
   }
 
