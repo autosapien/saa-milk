@@ -42,7 +42,6 @@ export class VisitorEntryPage implements OnInit {
     });
 
     // Initial values for the fields
-    // this.form.get('numberVisitors').setValue('');
     this._setFormDate('date', this.dateDispayed);
   }
 
