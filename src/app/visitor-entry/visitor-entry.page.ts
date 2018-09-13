@@ -34,6 +34,7 @@ export class VisitorEntryPage implements OnInit {
   }
 
   ngOnInit() {
+
     // Create the form and define fields and validators.
     this.form = this.formBuilder.group({
       numberVisitors: ['', Validators.required],
@@ -41,8 +42,8 @@ export class VisitorEntryPage implements OnInit {
     });
 
     // Initial values for the fields
-    this.form.get('numberVisitors').setValue(100);
-    this.form.get('date').setValue(this.dateDispayed.toJSON());
+    this.form.get('numberVisitors').setValue(0);
+    this._setFormDate('date', this.dateDispayed);
   }
 
   /**
@@ -50,20 +51,27 @@ export class VisitorEntryPage implements OnInit {
    * @param days The number of days to move the date in the date field
    */
   moveDate(days) {
+    // get the date from the form field
     const formValue = this.form.get('date').value;
+
+    // the form can have 2 types of values: a date object or an an boject with 3 entries (d,m,y)
     let d = null;
     if (typeof formValue === 'string') {
       d = new Date(formValue);
       d = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     } else {
-      console.log(formValue);
-      d = new Date(formValue.year.value, formValue.month.value, formValue.day.value);
+      d = new Date(formValue.year.value, formValue.month.value - 1, formValue.day.value);
     }
-    console.log(d);
     d.setDate(d.getDate() + days);
-    this.form.get('date').setValue(d.toJSON());
+
+    // set the value in the form
+    this._setFormDate('date', d);
   }
 
+  /**
+   * Close this modal form
+   * @param data
+   */
   close(data) {
     this.modalController.dismiss(data);
   }
@@ -89,4 +97,17 @@ export class VisitorEntryPage implements OnInit {
     }
   }
 
+  /**
+   * Set the date field in the form
+   * @param formElementName The form element that we need to set
+   * @param date The date value to set to
+   */
+  private _setFormDate(formElementName: string, date: Date) {
+    // toJSON() removes the timezone and moves the date to UTC. For example:
+    // Thu Sep 13 2018 13:33:05 GMT+0530 (India Standard Time) becomes "2018-09-13T08:03:05.432Z"
+    // Se we subract the offset minutes from UTC (IST is -330) to get local date as string
+    const d = date;
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    this.form.get(formElementName).setValue(d.toJSON());
+  }
 }

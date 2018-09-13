@@ -14,14 +14,14 @@
 
     <ion-grid>
       <ion-row>
-        <ion-col size="1" align-self-end text-right>
+        <ion-col size="2" align-self-end>
           <div class="date_select-arrow-left">
             <ion-button color="dark" fill="empty" (click)=moveDate(-1)>
               <ion-icon name="arrow-back"></ion-icon>
             </ion-button>
           </div>
         </ion-col>
-        <ion-col size="10">
+        <ion-col size="8" text-center>
           <ion-item>
             <ion-label position="floating">Date</ion-label>
             <ion-datetime formControlName="date" type="date" display-format="DDDD D MMM, YYYY"></ion-datetime>
@@ -34,7 +34,7 @@
             </ng-container>
           </div>
         </ion-col>
-        <ion-col size="1" align-self-end text-left>
+        <ion-col size="2" align-self-end>
           <div class="date_select-arrow-right">
             <ion-button color="dark" fill="empty" (click)=moveDate(1)>
               <ion-icon name="arrow-forward"></ion-icon>
@@ -44,7 +44,7 @@
       </ion-row>
 
       <ion-row>
-        <ion-col size="10" offset="1">
+        <ion-col size="8" offset="2">
           <ion-item>
             <ion-label position="floating">Number of Visitors</ion-label>
             <ion-input type="number" min="0" formControlName="numberVisitors"></ion-input>
