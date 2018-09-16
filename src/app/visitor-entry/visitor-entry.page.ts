@@ -59,13 +59,33 @@ export class VisitorEntryPage implements OnInit {
       d = new Date(formValue);
       d.setMinutes(d.getMinutes() + d.getTimezoneOffset());  // put into UTC for the form element (see _setFormDate)
     } else {
-      d = new Date(formValue.year.value, formValue.month.value - 1, formValue.day.value);
+      d = this._convertToDateFromDatePicker(formValue);
     }
     d.setDate(d.getDate() + days);
 
     // set the value in the form
     this._setFormDate('date', d);
   }
+
+  /**
+   * A date picker returns a triple (year, month, day) instead of a date object. Convert to date object
+   * @param formValue
+   */
+  _convertToDateFromDatePicker(formValue): Date {
+    return new Date(formValue.year.value, formValue.month.value - 1, formValue.day.value);
+  }
+
+  /**
+   * A date picker returns a triple (year, month, day) instead of a date object.
+   * Convert to a string that is similar to the one returned by the date input field
+   * @param formValue
+   */
+  _convertToDateStringFromDatePicker(formValue): string {
+    const d = this._convertToDateFromDatePicker(formValue);
+    const month = d.getMonth() + 1;
+    return d.getFullYear() + '-' + month + '-' + d.getDate();
+  }
+
 
   /**
    * Close this modal form
@@ -76,15 +96,11 @@ export class VisitorEntryPage implements OnInit {
   }
 
   async onSubmit(data) {
-    // restructure the data element for consumption
+    // in case the datepicker was used to get the date, we need to convert to date object
+    if (typeof data['date'] !== 'string') {  // it must be from the date picker
+      data['date'] = this._convertToDateStringFromDatePicker(data['date']);
+    }
     console.log(data);
-    const d = new Date(data['date']);
-    console.log(d);
-    /*data['date'] = new Date(
-      data['date'].getFullYear(),
-      data['date'].getMonth() - 1,
-      data['date'].getDate()
-    );*/
 
     // show a message that the data is saving
     const loading = await this.loadingController.create({
